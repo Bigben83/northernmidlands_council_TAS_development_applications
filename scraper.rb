@@ -62,7 +62,7 @@ document_description = ''
 date_scraped = Date.today.to_s
 
 
-logger.info("Start Extraction of Data")
+ogger.info("Start Extraction of Data")
 
 # Find the div with the id "current-development-applications"
 applications_div = doc.at('#current-development-applications')
@@ -94,6 +94,18 @@ applications_div.search('p a').each do |listing|
     description = description_match ? description_match[1] : nil
   end
 
+  # Extract the second <a> tag's <span> with title reference and description
+  second_a_tag = listing.at('span')&.text.strip
+  if second_a_tag
+    # Extract title reference (e.g., (CT 21938/12))
+    title_reference_match = second_a_tag.match(/\((.*?)\)/)
+    title_reference = title_reference_match ? title_reference_match[1] : nil
+
+    # Extract description (the text after the first hyphen in the span)
+    description_match = second_a_tag.match(/-\s*(.*)/)
+    description = description_match ? description_match[1] : nil
+  end
+
   # Extract the PDF link (href)
   pdf_url = listing['href']
 
@@ -102,20 +114,12 @@ applications_div.search('p a').each do |listing|
 
   if existing_entry.empty? # Only insert if the entry doesn't already exist
   # Step 5: Insert the data into the database
-  db.execute("INSERT INTO northernmidlands (address, on_notice_to, description, document_description, council_reference, date_scraped)
-              VALUES (?, ?, ?, ?, ?, ?)", [address, on_notice_to, description, document_description, council_reference, date_scraped])
+  db.execute("INSERT INTO northernmidlands (address, on_notice_to, description, document_description, council_reference, title_reference, date_scraped)
+              VALUES (?, ?, ?, ?, ?, ?, ?)", [address, on_notice_to, description, document_description, council_reference, title_reference, date_scraped])
 
   logger.info("Data for #{council_reference} saved to database.")
     else
       logger.info("Duplicate entry for application #{council_reference} found. Skipping insertion.")
     end
-  
-  # Output the extracted information
-  logger.info("Council Reference: #{council_reference}")
-  logger.info("Address: #{address}")
-  logger.info("Description: #{description}")
-  logger.info("On Notice To: #{on_notice_to}")
-  logger.info("PDF Link: #{pdf_url}")
-  logger.info("-----------------------------------")
   
 end
