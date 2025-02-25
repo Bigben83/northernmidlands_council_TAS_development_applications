@@ -118,7 +118,16 @@ applications_div.search('p a').each do |listing|
   end
   
   # Extract the PDF link (href)
-  pdf_url = listing['href']
+  document_description = listing['href']
+
+  # Output the extracted information
+  logger.info("Council Reference: #{council_reference}")
+  logger.info("Address: #{address}")
+  logger.info("Description: #{description}")
+  logger.info("On Notice To: #{on_notice_to_date}")
+  logger.info("PDF Link: #{document_description}")
+  logger.info("Title Reference: #{title_reference}")
+  logger.info("-----------------------------------")
   
   # Step 6: Ensure the entry does not already exist before inserting
   existing_entry = db.execute("SELECT * FROM northernmidlands WHERE council_reference = ?", council_reference )
@@ -131,13 +140,5 @@ applications_div.search('p a').each do |listing|
   logger.info("Data for #{council_reference} saved to database.")
     else
       logger.info("Duplicate entry for application #{council_reference} found. Skipping insertion.")
-    end
-  # Output the extracted information
-  logger.info("Council Reference: #{council_reference}")
-  logger.info("Address: #{address}")
-  logger.info("Description: #{description}")
-  logger.info("On Notice To: #{on_notice_to_date}")
-  logger.info("PDF Link: #{pdf_url}")
-  logger.info("Title Reference: #{title_reference}")
-  logger.info("-----------------------------------")
+  end
 end
