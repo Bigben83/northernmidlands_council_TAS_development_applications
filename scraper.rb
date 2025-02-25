@@ -9,7 +9,7 @@ require 'cgi'
 logger = Logger.new(STDOUT)
 
 # URL of the Glenorchy City Council planning applications page
-url = "https://northernmidlands.tas.gov.au/planning/development-in-the-northern-midlands/development-applications-2"
+url = "https://northernmidlands.tas.gov.au/planning/development-in-the-northern-midlands/development-applications-2/"
 
 # Step 1: Fetch the page content
 begin
