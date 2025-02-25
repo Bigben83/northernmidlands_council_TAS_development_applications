@@ -79,12 +79,17 @@ applications_div.search('p a').each do |listing|
 
   # Add safety checks to avoid nil errors when using regular expressions
   if title
+    # Extract council reference
     council_reference_match = title.match(/(PLN-\d{2}-\d{4})/)
     council_reference = council_reference_match ? council_reference_match[0] : nil
 
-    address_match = title.match(/(?:PLN-\d{2}-\d{4})\s*-\s*(.*?):/)
-    address = address_match ? address_match[1] : nil
+    # Extract address (text after the hyphen and before the colon)
+    address_match = title.match(/(?:PLN-\d{2}-\d{4})\s*-\s*(.*?),\s*(.*)/)
+    if address_match
+      address = "#{address_match[1]}, #{address_match[2]}"  # Combining street and suburb
+    end
 
+    # Extract description (text after the colon)
     description_match = title.match(/:\s*(.*)/)
     description = description_match ? description_match[1] : nil
   end
@@ -92,6 +97,19 @@ applications_div.search('p a').each do |listing|
   # Extract the PDF link (href)
   pdf_url = listing['href']
 
+  # Step 6: Ensure the entry does not already exist before inserting
+  existing_entry = db.execute("SELECT * FROM northernmidlands WHERE council_reference = ?", council_reference )
+
+  if existing_entry.empty? # Only insert if the entry doesn't already exist
+  # Step 5: Insert the data into the database
+  db.execute("INSERT INTO northernmidlands (address, on_notice_to, description, document_description, council_reference, date_scraped)
+              VALUES (?, ?, ?, ?, ?, ?)", [address, on_notice_to, description, document_description, council_reference, date_scraped])
+
+  logger.info("Data for #{council_reference} saved to database.")
+    else
+      logger.info("Duplicate entry for application #{council_reference} found. Skipping insertion.")
+    end
+  
   # Output the extracted information
   logger.info("Council Reference: #{council_reference}")
   logger.info("Address: #{address}")
@@ -99,4 +117,5 @@ applications_div.search('p a').each do |listing|
   logger.info("On Notice To: #{on_notice_to}")
   logger.info("PDF Link: #{pdf_url}")
   logger.info("-----------------------------------")
+  
 end
