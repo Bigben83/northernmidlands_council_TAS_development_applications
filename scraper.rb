@@ -99,11 +99,10 @@ applications_div.search('p').each do |job|
       council_reference = council_reference_match ? council_reference_match[0] : nil
 
       # Extract address (text after the hyphen and before the colon)
-      address_match = title.match(/(?:PLN-\d{2}-\d{4})\s*-\s*(.*?),\s*(.*)/)
+      address_match = title.match(/(?:PLN-\d{2}-\d{4})\s*-\s*(.*?),\s*(.*?)(?=:)/)
       if address_match
         address = "#{address_match[1]}, #{address_match[2]}"  # Combining street and suburb
         address = address.chomp(':')  # Remove any trailing colon if it exists
-        #address = address.gsub(/[^\w\s]/, '')  # Remove all non-alphanumeric characters (except spaces)
       end
 
       # Extract description (text after the colon)
