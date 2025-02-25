@@ -61,23 +61,26 @@ stage_status = ''
 document_description = ''
 date_scraped = Date.today.to_s
 
+
 logger.info("Start Extraction of Data")
 
 # Find the div with the id "current-development-applications"
 applications_div = doc.at('#current-development-applications')
 
 # Extract closing date (on_notice_to) from <h2>
-on_notice_to = applications_div.at('h2').text.strip
+on_notice_to = applications_div.at('h2')&.text.strip
 
 # Extract the individual planning applications
 applications_div.search('p a').each do |listing|
   # Extract title and description (title and address)
-  title = listing.at('strong').text.strip
-  address = title.match(/(?:PLN-\d{2}-\d{4})\s*-\s*(.*?):/).captures.first
-  description = title.match(/:\s*(.*)/).captures.first
+  title = listing.at('strong')&.text.strip
 
-  # Extract council reference from the title
-  council_reference = title.match(/(PLN-\d{2}-\d{4})/).captures.first
+  # Add safety checks to avoid nil errors when using regular expressions
+  if title
+    council_reference = title.match(/(PLN-\d{2}-\d{4})/)&.captures&.first
+    address = title.match(/(?:PLN-\d{2}-\d{4})\s*-\s*(.*?):/)&.captures&.first
+    description = title.match(/:\s*(.*)/)&.captures&.first
+  end
 
   # Extract the PDF link (href)
   pdf_url = listing['href']
