@@ -83,42 +83,60 @@ on_notice_to = on_notice_to_element ? on_notice_to_element.text.strip.sub('closi
   end
 
 # Extract the individual planning applications
-applications_div.search('p a').each do |listing|
-  # Extract title and description (title and address)
-  title_element = listing.at('strong')
-  title = title_element ? title_element.text.strip : nil
+applications_div.search('p').each do |job|
+  # Extract the two <a> tags within the <p> (since each job has 2 <a> tags)
+  a_tags = job.search('a')
 
-  # Add safety checks to avoid nil errors when using regular expressions
-  if title
-    # Extract council reference
-    council_reference_match = title.match(/(PLN-\d{2}-\d{4})/)
-    council_reference = council_reference_match ? council_reference_match[0] : nil
+  if a_tags.length == 2  # Ensure there are exactly 2 <a> tags
+    # First <a> tag (title and address)
+    title_element = a_tags[0].at('strong')
+    title = title_element ? title_element.text.strip : nil
 
-    # Extract address (text after the hyphen and before the colon)
-    address_match = title.match(/(?:PLN-\d{2}-\d{4})\s*-\s*(.*?),\s*(.*)/)
-    if address_match
-      address = "#{address_match[1]}, #{address_match[2]}"  # Combining street and suburb
+    # Extract the council reference, address, description, etc. (same logic as before)
+    if title
+      # Extract council reference
+      council_reference_match = title.match(/(PLN-\d{2}-\d{4})/)
+      council_reference = council_reference_match ? council_reference_match[0] : nil
+
+      # Extract address (text after the hyphen and before the colon)
+      address_match = title.match(/(?:PLN-\d{2}-\d{4})\s*-\s*(.*?),\s*(.*)/)
+      if address_match
+        address = "#{address_match[1]}, #{address_match[2]}"  # Combining street and suburb
+      end
+
+      # Extract description (text after the colon)
+      description_match = title.match(/:\s*(.*)/)
+      description = description_match ? description_match[1] : nil
     end
 
-    # Extract description (text after the colon)
-    description_match = title.match(/:\s*(.*)/)
-    description = description_match ? description_match[1] : nil
-  end
+    # Second <a> tag (title reference and description)
+    second_a_tag = a_tags[1].text.strip
+    if second_a_tag
+      # Extract title reference (e.g., (CT 21938/12)) and remove "CT"
+      title_reference_match = second_a_tag.match(/\((.*?)\)/)
+      title_reference = title_reference_match ? title_reference_match[1].gsub('CT ', '') : nil
 
-  # Extract the second <a> tag's <span> with title reference and description
-  second_a_tag = listing.at('span') && listing.at('span').text.strip
-  if second_a_tag
-    # Extract title reference (e.g., (CT 21938/12)) and remove "CT"
-    title_reference_match = second_a_tag.match(/\((.*?)\)/)
-    title_reference = title_reference_match ? title_reference_match[1].gsub('CT ', '') : nil
+      # Extract description (the text after the first hyphen in the span)
+      description_match = second_a_tag.match(/-\s*(.*)/)
+      description = description_match ? description_match[1] : nil
+    end
 
-    # Extract description (the text after the first hyphen in the span)
-    description_match = second_a_tag.match(/-\s*(.*)/)
-    description = description_match ? description_match[1] : nil
-  end
-  
-  # Extract the PDF link (href)
-  document_description = listing['href']
+    # Extract the PDF link (href) from either of the <a> tags (both point to the same PDF)
+    document_description = a_tags[0]['href']  # Both <a> tags have the same href link
+
+    # Extract the "on notice to" date and remove "closing ", then reformat it to YYYY-MM-DD
+    on_notice_to_element = job.at('h2')
+    on_notice_to = on_notice_to_element ? on_notice_to_element.text.strip.sub('closing ', '') : nil
+
+    # Convert the date to "YYYY-mm-dd" format
+    if on_notice_to
+      begin
+        on_notice_to_date = Date.strptime(on_notice_to, '%d %B %Y').strftime('%Y-%m-%d')
+      rescue ArgumentError => e
+        logger.error("Date parsing error: #{e.message}")
+        on_notice_to_date = nil
+      end
+    end
 
   # Output the extracted information
   logger.info("Council Reference: #{council_reference}")
