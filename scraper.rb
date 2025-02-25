@@ -72,6 +72,16 @@ on_notice_to_element = applications_div.at('h2')
 # on_notice_to = on_notice_to_element ? on_notice_to_element.text.strip : nil
 on_notice_to = on_notice_to_element ? on_notice_to_element.text.strip.sub('closing ', '') : nil
 
+  # Convert the date to "YYYY-mm-dd" format
+  if on_notice_to
+    begin
+      on_notice_to_date = Date.strptime(on_notice_to, '%d %B %Y').strftime('%Y-%m-%d')
+    rescue ArgumentError => e
+      logger.error("Date parsing error: #{e.message}")
+      on_notice_to_date = nil
+    end
+  end
+
 # Extract the individual planning applications
 applications_div.search('p a').each do |listing|
   # Extract title and description (title and address)
@@ -116,7 +126,7 @@ applications_div.search('p a').each do |listing|
   if existing_entry.empty? # Only insert if the entry doesn't already exist
   # Step 5: Insert the data into the database
   db.execute("INSERT INTO northernmidlands (address, on_notice_to, description, document_description, council_reference, title_reference, date_scraped)
-              VALUES (?, ?, ?, ?, ?, ?, ?)", [address, on_notice_to, description, document_description, council_reference, title_reference, date_scraped])
+              VALUES (?, ?, ?, ?, ?, ?, ?)", [address, on_notice_to_date, description, document_description, council_reference, title_reference, date_scraped])
 
   logger.info("Data for #{council_reference} saved to database.")
     else
@@ -126,7 +136,7 @@ applications_div.search('p a').each do |listing|
   logger.info("Council Reference: #{council_reference}")
   logger.info("Address: #{address}")
   logger.info("Description: #{description}")
-  logger.info("On Notice To: #{on_notice_to}")
+  logger.info("On Notice To: #{on_notice_to_date}")
   logger.info("PDF Link: #{pdf_url}")
   logger.info("Title Reference: #{title_reference}")
   logger.info("-----------------------------------")
