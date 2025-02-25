@@ -24,6 +24,9 @@ end
 # Step 2: Parse the page content using Nokogiri
 doc = Nokogiri::HTML(page_html)
 
+# Print the raw HTML for debugging purposes (optional)
+puts "Raw HTML: #{doc.body[0..500]}"  # Printing first 500 characters of the body
+
 # Step 3: Initialize the SQLite database
 db = SQLite3::Database.new "data.sqlite"
 
