@@ -124,20 +124,6 @@ applications_div.search('p').each do |job|
     # Extract the PDF link (href) from either of the <a> tags (both point to the same PDF)
     document_description = a_tags[0]['href']  # Both <a> tags have the same href link
 
-    # Extract the "on notice to" date and remove "closing ", then reformat it to YYYY-MM-DD
-    on_notice_to_element = job.at('h2')
-    on_notice_to = on_notice_to_element ? on_notice_to_element.text.strip.sub('closing ', '') : nil
-
-    # Convert the date to "YYYY-mm-dd" format
-    if on_notice_to
-      begin
-        on_notice_to_date = Date.strptime(on_notice_to, '%d %B %Y').strftime('%Y-%m-%d')
-      rescue ArgumentError => e
-        logger.error("Date parsing error: #{e.message}")
-        on_notice_to_date = nil
-      end
-    end
-
   # Output the extracted information
   logger.info("Council Reference: #{council_reference}")
   logger.info("Address: #{address}")
@@ -148,15 +134,16 @@ applications_div.search('p').each do |job|
   logger.info("-----------------------------------")
   
   # Step 6: Ensure the entry does not already exist before inserting
-  #existing_entry = db.execute("SELECT * FROM northernmidlands WHERE council_reference = ?", council_reference )
+  existing_entry = db.execute("SELECT * FROM northernmidlands WHERE council_reference = ?", council_reference )
 
-  #if existing_entry.empty? # Only insert if the entry doesn't already exist
+  if existing_entry.empty? # Only insert if the entry doesn't already exist
   # Step 5: Insert the data into the database
   db.execute("INSERT INTO northernmidlands (address, on_notice_to, description, document_description, council_reference, title_reference, date_scraped)
               VALUES (?, ?, ?, ?, ?, ?, ?)", [address, on_notice_to_date, description, document_description, council_reference, title_reference, date_scraped])
 
   logger.info("Data for #{council_reference} saved to database.")
-    #else
-      #logger.info("Duplicate entry for application #{council_reference} found. Skipping insertion.")
-  #end
+    else
+      logger.info("Duplicate entry for application #{council_reference} found. Skipping insertion.")
+  end
+end
 end
