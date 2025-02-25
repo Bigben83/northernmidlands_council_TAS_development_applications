@@ -102,6 +102,7 @@ applications_div.search('p').each do |job|
       address_match = title.match(/(?:PLN-\d{2}-\d{4})\s*-\s*(.*?),\s*(.*)/)
       if address_match
         address = "#{address_match[1]}, #{address_match[2]}"  # Combining street and suburb
+        address = address.chomp(':')  # Remove any trailing colon if it exists
       end
 
       # Extract description (text after the colon)
