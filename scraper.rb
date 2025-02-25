@@ -103,7 +103,7 @@ applications_div.search('p').each do |job|
       if address_match
         address = "#{address_match[1]}, #{address_match[2]}"  # Combining street and suburb
         address = address.chomp(':')  # Remove any trailing colon if it exists
-        address = address.gsub(/[^\w\s]/, '')  # Remove all non-alphanumeric characters (except spaces)
+        #address = address.gsub(/[^\w\s]/, '')  # Remove all non-alphanumeric characters (except spaces)
       end
 
       # Extract description (text after the colon)
@@ -134,15 +134,16 @@ applications_div.search('p').each do |job|
   logger.info("PDF Link: #{document_description}")
   logger.info("Title Reference: #{title_reference}")
   logger.info("-----------------------------------")
+  logger.info("Executing SQL: INSERT INTO northernmidlands (address, on_notice_to, description, document_description, council_reference, title_reference, date_scraped) VALUES (#{address}, #{on_notice_to_date}, #{description}, #{document_description}, #{council_reference}, #{title_reference}, #{date_scraped})")
   
   # Step 6: Ensure the entry does not already exist before inserting
   existing_entry = db.execute("SELECT * FROM northernmidlands WHERE council_reference = ?", council_reference )
 
   if existing_entry.empty? # Only insert if the entry doesn't already exist
   # Step 5: Insert the data into the database
-  db.execute("INSERT INTO northernmidlands (address, on_notice_to, description, document_description, council_reference, title_reference, date_scraped)
-              VALUES (?, ?, ?, ?, ?, ?, ?)", [address, on_notice_to_date, description, document_description, council_reference, title_reference, date_scraped])
-
+  result = db.execute("INSERT INTO northernmidlands (address, on_notice_to, description, document_description, council_reference, title_reference, date_scraped) VALUES (?, ?, ?, ?, ?, ?, ?)", [address, on_notice_to_date, description, document_description, council_reference, title_reference, date_scraped])
+  logger.info("Database result: #{result.inspect}")
+    
   logger.info("Data for #{council_reference} saved to database.")
     else
       logger.info("Duplicate entry for application #{council_reference} found. Skipping insertion.")
