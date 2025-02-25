@@ -62,7 +62,7 @@ document_description = ''
 date_scraped = Date.today.to_s
 
 
-ogger.info("Start Extraction of Data")
+logger.info("Start Extraction of Data")
 
 # Find the div with the id "current-development-applications"
 applications_div = doc.at('#current-development-applications')
