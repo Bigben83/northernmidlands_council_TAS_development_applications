@@ -67,9 +67,10 @@ logger.info("Start Extraction of Data")
 # Find the div with the id "current-development-applications"
 applications_div = doc.at('#current-development-applications')
 
-# Extract the "on notice to" date and remove "closing "
-  on_notice_to_element = listing.at('h2')
-  on_notice_to = on_notice_to_element ? on_notice_to_element.text.strip.sub('closing ', '') : nil
+# Extract closing date (on_notice_to) from <h2>
+on_notice_to_element = applications_div.at('h2')
+# on_notice_to = on_notice_to_element ? on_notice_to_element.text.strip : nil
+on_notice_to = on_notice_to_element ? on_notice_to_element.text.strip.sub('closing ', '') : nil
 
 # Extract the individual planning applications
 applications_div.search('p a').each do |listing|
