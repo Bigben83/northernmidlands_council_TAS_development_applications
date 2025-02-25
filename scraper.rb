@@ -65,7 +65,7 @@ date_scraped = Date.today.to_s
 logger.info("Start Extraction of Data")
 
 # Parse the content to get all the planning applications
-page.search('.tab-pane .generic-list__item').each do |listing|
+doc.search('.tab-pane .generic-list__item').each do |listing|
   # Extract the details for each planning application
   title = listing.at('.generic-list__title a').text.strip
   pdf_url = listing.at('.generic-list__title a')['href']
