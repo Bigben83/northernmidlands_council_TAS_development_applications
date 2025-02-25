@@ -67,9 +67,9 @@ logger.info("Start Extraction of Data")
 # Find the div with the id "current-development-applications"
 applications_div = doc.at('#current-development-applications')
 
-# Extract closing date (on_notice_to) from <h2>
-on_notice_to_element = applications_div.at('h2')
-on_notice_to = on_notice_to_element ? on_notice_to_element.text.strip : nil
+# Extract the "on notice to" date and remove "closing "
+  on_notice_to_element = listing.at('h2')
+  on_notice_to = on_notice_to_element ? on_notice_to_element.text.strip.sub('closing ', '') : nil
 
 # Extract the individual planning applications
 applications_div.search('p a').each do |listing|
@@ -97,15 +97,15 @@ applications_div.search('p a').each do |listing|
   # Extract the second <a> tag's <span> with title reference and description
   second_a_tag = listing.at('span') && listing.at('span').text.strip
   if second_a_tag
-    # Extract title reference (e.g., (CT 21938/12))
+    # Extract title reference (e.g., (CT 21938/12)) and remove "CT"
     title_reference_match = second_a_tag.match(/\((.*?)\)/)
-    title_reference = title_reference_match ? title_reference_match[1] : nil
+    title_reference = title_reference_match ? title_reference_match[1].gsub('CT ', '') : nil
 
     # Extract description (the text after the first hyphen in the span)
     description_match = second_a_tag.match(/-\s*(.*)/)
     description = description_match ? description_match[1] : nil
   end
-
+  
   # Extract the PDF link (href)
   pdf_url = listing['href']
   
