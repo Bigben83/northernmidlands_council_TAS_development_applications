@@ -103,6 +103,7 @@ applications_div.search('p').each do |job|
       if address_match
         address = "#{address_match[1]}, #{address_match[2]}"  # Combining street and suburb
         address = address.chomp(':')  # Remove any trailing colon if it exists
+        address = address.gsub(/[^\w\s]/, '')  # Remove all non-alphanumeric characters (except spaces)
       end
 
       # Extract description (text after the colon)
