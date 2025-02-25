@@ -27,6 +27,7 @@ doc = Nokogiri::HTML(page_html)
 # Step 3: Initialize the SQLite database
 db = SQLite3::Database.new "data.sqlite"
 
+logger.info("Create table")
 # Create table
 db.execute <<-SQL
   CREATE TABLE IF NOT EXISTS northernmidlands (
@@ -61,11 +62,10 @@ document_description = ''
 date_scraped = Date.today.to_s
 
 
-# Loop through each content block in the main listing
-doc.search('.tab-pane .generic-list__item').each do |listing|
+logger.info("Start Extraction of Data")
 
-  logger.info("Start Extraction of Data")
-  
+# Loop through each content block in the main listing
+doc.search('.tab-pane .generic-list__item').each do |listing| 
   # Extract the details for each planning application
   title = listing.at('.generic-list__title a').text.strip
   document_description = listing.at('.generic-list__title a')['href']
