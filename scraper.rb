@@ -24,6 +24,8 @@ end
 # Step 2: Parse the page content using Nokogiri
 doc = Nokogiri::HTML(page_html)
 
+puts doc.to_html  # Print the entire parsed HTML
+
 # Step 3: Initialize the SQLite database
 db = SQLite3::Database.new "data.sqlite"
 
