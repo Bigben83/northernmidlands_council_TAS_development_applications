@@ -24,8 +24,6 @@ end
 # Step 2: Parse the page content using Nokogiri
 doc = Nokogiri::HTML(page_html)
 
-puts doc.to_html  # Print the entire parsed HTML
-
 # Step 3: Initialize the SQLite database
 db = SQLite3::Database.new "data.sqlite"
 
@@ -67,16 +65,13 @@ date_scraped = Date.today.to_s
 logger.info("Start Extraction of Data")
 
 # Parse the content to get all the planning applications
-doc.search('.tab-pane .generic-list__item').each do |listing|
+doc.search('.tab-pane .tab-content a').each do |listing|
   # Extract the details for each planning application
-  title = listing.at('.generic-list__title a').text.strip
-  pdf_url = listing.at('.generic-list__title a')['href']
-  submission_date = listing.at('span').text.match(/submissions by (\d{1,2}\/\d{1,2}\/\d{4})/)[1]  # Extract submission deadline
+  title = listing.at('strong').text.strip
+  pdf_url = listing['href']
+  submission_date = listing.text.match(/submissions by (\d{1,2}\/\d{1,2}\/\d{4})/)[1]  # Extract submission deadline
 
-  # Construct the PDF link by checking if the URL is absolute or relative
-  pdf_url = URI.join(url, pdf_url).to_s
-
-  # Extract the council_reference, address, description, and submission deadline
+  # Extract council_reference, address, description, and submission deadline
   council_reference = title.match(/(PLN-\d{2}-\d{4})/)[0]  # Extract reference code like PLN-24-0109
   address = title.match(/(?:PLN-\d{2}-\d{4})\s*-\s*(.*?):/)[1]  # Extract address (text before ':')
   description = title.match(/:\s*(.*)/)[1]  # Extract description (text after ':')
