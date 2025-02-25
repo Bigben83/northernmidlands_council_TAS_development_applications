@@ -72,43 +72,49 @@ on_notice_to_element = applications_div.at('h2')
 on_notice_to = on_notice_to_element ? on_notice_to_element.text.strip : nil
 
 # Extract the individual planning applications
-applications_div.search('p a').each do |listing|
-  # Extract title and description (title and address)
-  title_element = listing.at('strong')
-  title = title_element ? title_element.text.strip : nil
+applications_div.search('p').each do |listing|
+  # First <a> link with <strong> for council reference and address
+  first_a_tag = listing.at('a')
+  if first_a_tag
+    title_element = first_a_tag.at('strong')
+    title = title_element ? title_element.text.strip : nil
 
-  # Add safety checks to avoid nil errors when using regular expressions
-  if title
-    # Extract council reference
-    council_reference_match = title.match(/(PLN-\d{2}-\d{4})/)
-    council_reference = council_reference_match ? council_reference_match[0] : nil
+    # Add safety checks to avoid nil errors when using regular expressions
+    if title
+      # Extract council reference
+      council_reference_match = title.match(/(PLN-\d{2}-\d{4})/)
+      council_reference = council_reference_match ? council_reference_match[0] : nil
 
-    # Extract address (text after the hyphen and before the colon)
-    address_match = title.match(/(?:PLN-\d{2}-\d{4})\s*-\s*(.*?),\s*(.*)/)
-    if address_match
-      address = "#{address_match[1]}, #{address_match[2]}"  # Combining street and suburb
+      # Extract address (text after the hyphen and before the colon)
+      address_match = title.match(/(?:PLN-\d{2}-\d{4})\s*-\s*(.*?),\s*(.*)/)
+      if address_match
+        address = "#{address_match[1]}, #{address_match[2]}"  # Combining street and suburb
+      end
+
+      # Extract description (text after the colon)
+      description_match = title.match(/:\s*(.*)/)
+      description = description_match ? description_match[1] : nil
     end
-
-    # Extract description (text after the colon)
-    description_match = title.match(/:\s*(.*)/)
-    description = description_match ? description_match[1] : nil
   end
 
-  # Extract the second <a> tag's <span> with title reference and description
-  second_a_tag = listing.at('span') && listing.at('span').text.strip
+  # Second <a> link with <span> for title reference and description
+  second_a_tag = listing.at('a:nth-child(2)')
   if second_a_tag
+    second_span = second_a_tag.at('span')
+    second_text = second_span ? second_span.text.strip : nil
+
     # Extract title reference (e.g., (CT 21938/12))
-    title_reference_match = second_a_tag.match(/\((.*?)\)/)
+    title_reference_match = second_text.match(/\((.*?)\)/)
     title_reference = title_reference_match ? title_reference_match[1] : nil
 
     # Extract description (the text after the first hyphen in the span)
-    description_match = second_a_tag.match(/-\s*(.*)/)
-    description = description_match ? description_match[1] : nil
+    description_match = second_text.match(/-\s*(.*)/)
+    description = description_match ? description_match[1] : description  # Retain first description if empty
   end
 
   # Extract the PDF link (href)
-  pdf_url = listing['href']
-
+  pdf_url = first_a_tag['href'] if first_a_tag
+  
   # Step 6: Ensure the entry does not already exist before inserting
   # existing_entry = db.execute("SELECT * FROM northernmidlands WHERE council_reference = ?", council_reference )
 
