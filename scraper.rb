@@ -95,7 +95,7 @@ applications_div.search('p a').each do |listing|
   end
 
   # Extract the second <a> tag's <span> with title reference and description
-  second_a_tag = listing.at('span')&.text.strip
+  second_a_tag = listing.at('span') && listing.at('span').text.strip
   if second_a_tag
     # Extract title reference (e.g., (CT 21938/12))
     title_reference_match = second_a_tag.match(/\((.*?)\)/)
