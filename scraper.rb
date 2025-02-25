@@ -121,5 +121,12 @@ applications_div.search('p a').each do |listing|
     else
       logger.info("Duplicate entry for application #{council_reference} found. Skipping insertion.")
     end
-  
+  # Output the extracted information
+  logger.info("Council Reference: #{council_reference}")
+  logger.info("Address: #{address}")
+  logger.info("Description: #{description}")
+  logger.info("On Notice To: #{on_notice_to}")
+  logger.info("PDF Link: #{pdf_url}")
+  logger.info("Title Reference: #{title_reference}")
+  logger.info("-----------------------------------")
 end
