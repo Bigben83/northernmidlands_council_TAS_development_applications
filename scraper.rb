@@ -68,18 +68,25 @@ logger.info("Start Extraction of Data")
 applications_div = doc.at('#current-development-applications')
 
 # Extract closing date (on_notice_to) from <h2>
-on_notice_to = applications_div.at('h2')&.text.strip
+on_notice_to_element = applications_div.at('h2')
+on_notice_to = on_notice_to_element ? on_notice_to_element.text.strip : nil
 
 # Extract the individual planning applications
 applications_div.search('p a').each do |listing|
   # Extract title and description (title and address)
-  title = listing.at('strong')&.text.strip
+  title_element = listing.at('strong')
+  title = title_element ? title_element.text.strip : nil
 
   # Add safety checks to avoid nil errors when using regular expressions
   if title
-    council_reference = title.match(/(PLN-\d{2}-\d{4})/)&.captures&.first
-    address = title.match(/(?:PLN-\d{2}-\d{4})\s*-\s*(.*?):/)&.captures&.first
-    description = title.match(/:\s*(.*)/)&.captures&.first
+    council_reference_match = title.match(/(PLN-\d{2}-\d{4})/)
+    council_reference = council_reference_match ? council_reference_match[0] : nil
+
+    address_match = title.match(/(?:PLN-\d{2}-\d{4})\s*-\s*(.*?):/)
+    address = address_match ? address_match[1] : nil
+
+    description_match = title.match(/:\s*(.*)/)
+    description = description_match ? description_match[1] : nil
   end
 
   # Extract the PDF link (href)
