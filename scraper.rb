@@ -134,19 +134,18 @@ applications_div.search('p').each do |job|
   logger.info("PDF Link: #{document_description}")
   logger.info("Title Reference: #{title_reference}")
   logger.info("-----------------------------------")
-  logger.info("Executing SQL: INSERT INTO northernmidlands (address, on_notice_to, description, document_description, council_reference, title_reference, date_scraped) VALUES (#{address}, #{on_notice_to_date}, #{description}, #{document_description}, #{council_reference}, #{title_reference}, #{date_scraped})")
+  logger.info("Final SQL Query: INSERT INTO northernmidlands (address, on_notice_to, description, document_description, council_reference, title_reference, date_scraped) VALUES (#{address.inspect}, #{on_notice_to_date.inspect}, #{description.inspect}, #{document_description.inspect}, #{council_reference.inspect}, #{title_reference.inspect}, #{date_scraped.inspect})")
   
   # Step 6: Ensure the entry does not already exist before inserting
   existing_entry = db.execute("SELECT * FROM northernmidlands WHERE council_reference = ?", council_reference )
 
   if existing_entry.empty? # Only insert if the entry doesn't already exist
   # Step 5: Insert the data into the database
+  # Ensure the query parameters are passed correctly as arguments to db.execute
   result = db.execute("INSERT INTO northernmidlands (address, on_notice_to, description, document_description, council_reference, title_reference, date_scraped) VALUES (?, ?, ?, ?, ?, ?, ?)", [address, on_notice_to_date, description, document_description, council_reference, title_reference, date_scraped])
-  logger.info("Database result: #{result.inspect}")
-    
   logger.info("Data for #{council_reference} saved to database.")
-    else
-      logger.info("Duplicate entry for application #{council_reference} found. Skipping insertion.")
+  else
+    logger.info("Duplicate entry for application #{council_reference} found. Skipping insertion.")
   end
 end
 end
