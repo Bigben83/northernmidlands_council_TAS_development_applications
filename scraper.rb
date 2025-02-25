@@ -67,6 +67,8 @@ logger.info("Start Extraction of Data")
 # Parse the content to get all the planning applications
 doc.search('.tab-pane .tab-content a').each do |listing|
   # Extract the details for each planning application
+  puts listing.to_s  # This will print out each matching element to confirm it's the right content
+  
   title = listing.at('strong').text.strip
   pdf_url = listing['href']
   submission_date = listing.text.match(/submissions by (\d{1,2}\/\d{1,2}\/\d{4})/)[1]  # Extract submission deadline
