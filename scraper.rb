@@ -130,15 +130,15 @@ applications_div.search('p a').each do |listing|
   logger.info("-----------------------------------")
   
   # Step 6: Ensure the entry does not already exist before inserting
-  existing_entry = db.execute("SELECT * FROM northernmidlands WHERE council_reference = ?", council_reference )
+  #existing_entry = db.execute("SELECT * FROM northernmidlands WHERE council_reference = ?", council_reference )
 
-  if existing_entry.empty? # Only insert if the entry doesn't already exist
+  #if existing_entry.empty? # Only insert if the entry doesn't already exist
   # Step 5: Insert the data into the database
   db.execute("INSERT INTO northernmidlands (address, on_notice_to, description, document_description, council_reference, title_reference, date_scraped)
               VALUES (?, ?, ?, ?, ?, ?, ?)", [address, on_notice_to_date, description, document_description, council_reference, title_reference, date_scraped])
 
   logger.info("Data for #{council_reference} saved to database.")
-    else
-      logger.info("Duplicate entry for application #{council_reference} found. Skipping insertion.")
-  end
+    #else
+      #logger.info("Duplicate entry for application #{council_reference} found. Skipping insertion.")
+  #end
 end
