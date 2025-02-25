@@ -61,29 +61,32 @@ stage_status = ''
 document_description = ''
 date_scraped = Date.today.to_s
 
-
 logger.info("Start Extraction of Data")
 
-# Parse the content to get all the planning applications
-doc.search('.tab-pane .tab-content a').each do |listing|
-  # Extract the details for each planning application
-  puts listing.to_s  # This will print out each matching element to confirm it's the right content
-  
-  title = listing.at('strong').text.strip
-  pdf_url = listing['href']
-  submission_date = listing.text.match(/submissions by (\d{1,2}\/\d{1,2}\/\d{4})/)[1]  # Extract submission deadline
+# Find the div with the id "current-development-applications"
+applications_div = doc.at('#current-development-applications')
 
-  # Extract council_reference, address, description, and submission deadline
-  council_reference = title.match(/(PLN-\d{2}-\d{4})/)[0]  # Extract reference code like PLN-24-0109
-  address = title.match(/(?:PLN-\d{2}-\d{4})\s*-\s*(.*?):/)[1]  # Extract address (text before ':')
-  description = title.match(/:\s*(.*)/)[1]  # Extract description (text after ':')
-  on_notice_to = submission_date  # Submission deadline as on_notice_to
+# Extract closing date (on_notice_to) from <h2>
+on_notice_to = applications_div.at('h2')&.text.strip
+
+# Extract the individual planning applications
+applications_div.search('p a').each do |listing|
+  # Extract title and description (title and address)
+  title = listing.at('strong')&.text.strip
+  address = title.match(/(?:PLN-\d{2}-\d{4})\s*-\s*(.*?):/)&.captures&.first
+  description = title.match(/:\s*(.*)/)&.captures&.first
+
+  # Extract council reference from the title
+  council_reference = title.match(/(PLN-\d{2}-\d{4})/)&.captures&.first
+
+  # Extract the PDF link (href)
+  pdf_url = listing['href']
 
   # Output the extracted information
-  puts "Council Reference: #{council_reference}"
-  puts "Address: #{address}"
-  puts "Description: #{description}"
-  puts "On Notice To: #{on_notice_to}"
-  puts "PDF Link: #{pdf_url}"
-  puts "-----------------------------------"
+  logger.info("Council Reference: #{council_reference}")
+  logger.info("Address: #{address}")
+  logger.info("Description: #{description}")
+  logger.info("On Notice To: #{on_notice_to}")
+  logger.info("PDF Link: #{pdf_url}")
+  logger.info("-----------------------------------")
 end
