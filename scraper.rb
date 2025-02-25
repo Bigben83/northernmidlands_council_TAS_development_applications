@@ -9,7 +9,7 @@ require 'cgi'
 logger = Logger.new(STDOUT)
 
 # URL of the Glenorchy City Council planning applications page
-url = "https://northernmidlands.tas.gov.au/planning/development-in-the-northern-midlands/development-applications-2/"
+url = "https://northernmidlands.tas.gov.au/planning/development-in-the-northern-midlands/development-applications-2"
 
 # Step 1: Fetch the page content
 begin
@@ -23,9 +23,6 @@ end
 
 # Step 2: Parse the page content using Nokogiri
 doc = Nokogiri::HTML(page_html)
-
-# Print the raw HTML for debugging purposes (optional)
-puts "Raw HTML: #{doc.body[0..500]}"  # Printing first 500 characters of the body
 
 # Step 3: Initialize the SQLite database
 db = SQLite3::Database.new "data.sqlite"
