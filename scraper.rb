@@ -64,37 +64,27 @@ date_scraped = Date.today.to_s
 
 logger.info("Start Extraction of Data")
 
-# Loop through each content block in the main listing
-doc.search('.tab-pane .generic-list__item').each do |listing| 
+# Parse the content to get all the planning applications
+page.search('.tab-pane .generic-list__item').each do |listing|
   # Extract the details for each planning application
   title = listing.at('.generic-list__title a').text.strip
-  document_description = listing.at('.generic-list__title a')['href']
-  date_received = listing.at('span').text.match(/submissions by (\d{1,2}\/\d{1,2}\/\d{4})/)[1]  # Extract submission deadline
+  pdf_url = listing.at('.generic-list__title a')['href']
+  submission_date = listing.at('span').text.match(/submissions by (\d{1,2}\/\d{1,2}\/\d{4})/)[1]  # Extract submission deadline
 
   # Construct the PDF link by checking if the URL is absolute or relative
-  document_description = URI.join(url, pdf_url).to_s
+  pdf_url = URI.join(url, pdf_url).to_s
 
   # Extract the council_reference, address, description, and submission deadline
   council_reference = title.match(/(PLN-\d{2}-\d{4})/)[0]  # Extract reference code like PLN-24-0109
   address = title.match(/(?:PLN-\d{2}-\d{4})\s*-\s*(.*?):/)[1]  # Extract address (text before ':')
   description = title.match(/:\s*(.*)/)[1]  # Extract description (text after ':')
   on_notice_to = submission_date  # Submission deadline as on_notice_to
-  
-  # Step 6: Ensure the entry does not already exist before inserting
-  existing_entry = db.execute("SELECT * FROM northernmidlands WHERE council_reference = ?", council_reference )
 
-  if existing_entry.empty? # Only insert if the entry doesn't already exist
-  # Step 5: Insert the data into the database
-  db.execute("INSERT INTO northernmidlands (address, on_notice_to, description, document_description, date_scraped)
-              VALUES (?, ?, ?, ?, ?)", [address, on_notice_to, description, document_description, date_scraped])
-
-  logger.info("Data for #{council_reference} saved to database.")
-    else
-      logger.info("Duplicate entry for application #{council_reference} found. Skipping insertion.")
-    end
-  
-  # If you need to handle additional details, such as geolocation, it can be extracted as follows:
-  lat = content_block.at_css('.content-block__map-link')['data-lat']
-  lng = content_block.at_css('.content-block__map-link')['data-lng']
-  logger.info("Latitude: #{lat}, Longitude: #{lng}")
+  # Output the extracted information
+  puts "Council Reference: #{council_reference}"
+  puts "Address: #{address}"
+  puts "Description: #{description}"
+  puts "On Notice To: #{on_notice_to}"
+  puts "PDF Link: #{pdf_url}"
+  puts "-----------------------------------"
 end
