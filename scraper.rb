@@ -63,6 +63,9 @@ date_scraped = Date.today.to_s
 
 # Loop through each content block in the main listing
 doc.search('.tab-pane .generic-list__item').each do |listing|
+
+  logger.info("Start Extraction of Data")
+  
   # Extract the details for each planning application
   title = listing.at('.generic-list__title a').text.strip
   document_description = listing.at('.generic-list__title a')['href']
